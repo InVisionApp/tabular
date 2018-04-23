@@ -1,3 +1,7 @@
+[![LICENSE](https://img.shields.io/badge/license-MIT-orange.svg)](LICENSE)
+[![Go Report Card](https://goreportcard.com/badge/github.com/InVisionApp/tabular)](https://goreportcard.com/report/github.com/InVisionApp/tabular)
+[![Godocs](https://img.shields.io/badge/golang-documentation-blue.svg)](https://godoc.org/github.com/InVisionApp/tabular)
+
 # tabular
 
 Tabular package to print ASCII tables from command line utilities.
