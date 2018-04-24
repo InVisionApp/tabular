@@ -8,19 +8,20 @@ import (
 // Format - maps short names of columns to a structure defining their full names and lengths
 //
 // For Example:
-// 	"env": Column{n: "Environment", l: 14},
-// 	"cls": Column{n: "Cluster", l: 40},
-// 	"srv": Column{n: "Service", l: 35},
-// 	"cr8": Column{n: "CreatedAt", l: 19},
-// 	"vld": Column{n: "Valid", l: 5},
-// 	"dbt": Column{n: "DBType", l: 10},
-// 	"hst": Column{n: "Host", l: 45},
-type Format map[string]Column
+// 	"env": Column{Name: "Environment", Length: 14},
+// 	"cls": Column{Name: "Cluster",     Length: 40},
+// 	"srv": Column{Name: "Service",     Length: 35},
+// 	"cr8": Column{Name: "CreatedAt",   Length: 19},
+// 	"vld": Column{Name: "Valid",       Length: 5},
+// 	"dbt": Column{Name: "DBType",      Length: 10},
+// 	"hst": Column{Name: "Host",        Length: 45},
+type Format map[string]*Column
 
 // Column - defines column's name and length
 type Column struct {
-	n string
-	l int
+	Name           string
+	Length         int
+	RightJustified bool
 }
 
 // Do - does the following:
@@ -29,9 +30,9 @@ type Column struct {
 //
 //    For example if Format is defined as:
 //
-// 	"env": Column{n: "Environment", l: 14},
-//      "cls": Column{n: "Cluster", l: 40},
-//      "srv": Column{n: "Service", l: 35},
+// 	"env": Column{Name: "Environment", Length: 14},
+//      "cls": Column{Name: "Cluster",     Length: 40},
+//      "srv": Column{Name: "Service",     Length: 35},
 //
 //    It'll produce:
 //
@@ -46,8 +47,8 @@ func (fm Format) Do(cols ...string) string {
 	var uline string
 	var format string
 	for _, c := range cols {
-		title = title + " " + fmt.Sprintf(fm[c].f(), fm[c].n)
-		uline = uline + " " + fmt.Sprintf(fm[c].f(), r(fm[c].l))
+		title = title + " " + fmt.Sprintf(fm[c].f(), fm[c].Name)
+		uline = uline + " " + fmt.Sprintf(fm[c].f(), r(fm[c].Length))
 		format = format + " " + fm[c].f()
 	}
 	fmt.Println(strings.TrimSpace(title))
@@ -56,24 +57,28 @@ func (fm Format) Do(cols ...string) string {
 }
 
 // New - Creates a new tabular Format
-func New() Format {
-	return Format{}
-}
+func New() Format { return Format{} }
 
 // Add - adds a new column to existing tabular Format
 func (fm Format) Add(shortName, fullName string, columnLength int) {
-	fm[shortName] = Column{n: fullName, l: columnLength}
+	fm[shortName] = &Column{Name: fullName, Length: columnLength}
 }
 
-// f() returns fmt formatting in a form of `%-14s`
-// for example if a Column is defined as:
-// 	Column{n: "Environment", l: 14}
-// }
-// It'll return: %-14s
-func (c Column) f() string {
-	return fmt.Sprintf("%%-%ds", c.l)
+// f() returns fmt formatting, for example:
+//
+// 	Column{Name: "Environment", Length: 14, RightJustified: false}
+// 	result => %-14v
+//
+// 	Column{Name: "PCT", Length: 5, RightJustified: true}
+// 	result => %5v
+func (c *Column) f() string {
+	pad := "-"
+	if c.RightJustified {
+		pad = ""
+	}
+	return fmt.Sprintf("%%%s%dv", pad, c.Length)
 }
 
-// r() returns a underbar line for table formatting "------"
-// with it's length set to the length of c
+// r() returns a dashed line for table formatting "------"
+// with it's length set to the length of l
 func r(l int) string { return strings.Repeat("-", l) }

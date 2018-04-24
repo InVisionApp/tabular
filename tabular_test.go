@@ -7,15 +7,15 @@ import (
 
 func TestTabular(t *testing.T) {
 	want := Format{
-		"env": Column{n: "Environment", l: 14},
-		"cls": Column{n: "Cluster", l: 10},
-		"svc": Column{n: "Service", l: 25},
-		"hst": Column{n: "Database Host", l: 25},
+		"env": &Column{Name: "Environment", Length: 14},
+		"cls": &Column{Name: "Cluster", Length: 10},
+		"svc": &Column{Name: "Service", Length: 25},
+		"hst": &Column{Name: "Database Host", Length: 25},
 	}
 
 	got := New()
 	for k, v := range want {
-		got.Add(k, v.n, v.l)
+		got.Add(k, v.Name, v.Length)
 	}
 
 	if !reflect.DeepEqual(want, got) {
