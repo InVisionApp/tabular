@@ -8,7 +8,7 @@ Tabular package to print ASCII tables from command line utilities.
 
 Example:
 
-```
+```go
 package main
 
 import (
