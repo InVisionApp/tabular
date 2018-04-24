@@ -5,19 +5,18 @@ import (
 	"strings"
 )
 
-// Format - maps short names of columns to a structure defining their full names and lengths
+// Format - maps short names of columns to their structure defining:
+//	full name, length and whether it's right justified
 //
 // For Example:
 // 	"env": Column{Name: "Environment", Length: 14},
 // 	"cls": Column{Name: "Cluster",     Length: 40},
 // 	"srv": Column{Name: "Service",     Length: 35},
-// 	"cr8": Column{Name: "CreatedAt",   Length: 19},
-// 	"vld": Column{Name: "Valid",       Length: 5},
-// 	"dbt": Column{Name: "DBType",      Length: 10},
 // 	"hst": Column{Name: "Host",        Length: 45},
+// 	"pct": Column{Name: "%CPU",        Length: 7, RightJustified: true},
 type Format map[string]*Column
 
-// Column - defines column's name and length
+// Column - defines column's name, length and if it's right justified
 type Column struct {
 	Name           string
 	Length         int
@@ -39,7 +38,8 @@ type Column struct {
 // 	Environment    Cluster                                  Service
 //	-------------- ---------------------------------------- -----------------------------------
 //
-// 2) Returns an fmt style format string to push values into this table:
+// 2) Returns an fmt style `format` string to output values
+//    under the above heading via Printf(format,...):
 //
 //	%-14v %-40v %-35v
 func (fm Format) Do(cols ...string) string {
