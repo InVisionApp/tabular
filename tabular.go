@@ -30,7 +30,7 @@ type Column struct {
 //
 //    For example if Format is defined as:
 //
-// 	"env": Column{Name: "Environment", Length: 14},
+//      "env": Column{Name: "Environment", Length: 14},
 //      "cls": Column{Name: "Cluster",     Length: 40},
 //      "srv": Column{Name: "Service",     Length: 35},
 //
@@ -41,7 +41,7 @@ type Column struct {
 //
 // 2) Returns an fmt style format string to push values into this table:
 //
-//	%-14s %-40s %-35s
+//	%-14v %-40v %-35v
 func (fm Format) Do(cols ...string) string {
 	var title string
 	var uline string
