@@ -10,7 +10,7 @@ Tabular simplifies printing ASCII tables from command line utilities without the
 
 Simply define the table columns and `tabular` will parse the right [format specifier](https://golang.org/pkg/fmt/#Printf) that you can use in your calls to `fmt` or any other function that supports it.
 
-Table columns can be defined once and then reused over and over again making it easy to modify column length and headings in one place.  And a subset of columns can be specified during Print() or Parse() calls to modify the table's title without redefining it.
+Table columns can be defined once and then reused over and over again making it easy to modify column length and heading in one place.  And a subset of columns can be specified during Print() or Parse() calls to modify the table's title without redefining it.
 
 Example (also available in [`example/example.go`](example/example.go):
 
