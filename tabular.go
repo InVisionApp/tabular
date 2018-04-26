@@ -5,7 +5,14 @@ import (
 	"strings"
 )
 
-// Format - maps short names of columns to their structure defining:
+// Table - parsed table's header, subheader and format specifier
+type Table struct {
+	Header    string
+	SubHeader string
+	Format    string
+}
+
+// Columns - maps short names of columns to their structure defining:
 //	full name, length and whether it's right justified
 //
 // For Example:
@@ -14,7 +21,7 @@ import (
 // 	"srv": Column{Name: "Service",     Length: 35},
 // 	"hst": Column{Name: "Host",        Length: 45},
 // 	"pct": Column{Name: "%CPU",        Length: 7, RightJustified: true},
-type Format map[string]*Column
+type Columns map[string]*Column
 
 // Column - defines column's name, length and if it's right justified
 type Column struct {
@@ -23,11 +30,14 @@ type Column struct {
 	RightJustified bool
 }
 
-// Do - does the following:
+// New - Creates a map of tabular Columns
+func New() Columns { return Columns{} }
+
+// Print - does the following:
 //
 // 1) prints a table style heading for a given list of columns.
 //
-//    For example if Format is defined as:
+//    For example if Columns are defined as:
 //
 //      "env": Column{Name: "Environment", Length: 14},
 //      "cls": Column{Name: "Cluster",     Length: 40},
@@ -38,30 +48,47 @@ type Column struct {
 // 	Environment    Cluster                                  Service
 //	-------------- ---------------------------------------- -----------------------------------
 //
-// 2) Returns an fmt style `format` string to output values
-//    under the above heading via Printf(format,...):
+// 2) Returns an fmt style format specifier string that you can use
+//    to output values under the above heading via Printf(format,...):
 //
 //	%-14v %-40v %-35v
-func (fm Format) Do(cols ...string) string {
-	var title string
-	var uline string
-	var format string
-	for _, c := range cols {
-		title = title + " " + fmt.Sprintf(fm[c].f(), fm[c].Name)
-		uline = uline + " " + fmt.Sprintf(fm[c].f(), r(fm[c].Length))
-		format = format + " " + fm[c].f()
-	}
-	fmt.Println(strings.TrimSpace(title))
-	fmt.Println(strings.TrimSpace(uline))
-	return strings.TrimSpace(format) + "\n"
+func (cl Columns) Print(cols ...string) string {
+	t := cl.parse(cols...)
+	fmt.Println(t.Header)
+	fmt.Println(t.SubHeader)
+	return t.Format
 }
 
-// New - Creates a new tabular Format
-func New() Format { return Format{} }
+// Parse - builds a Table out of a given list of columns
+//
+// To simply print the table's title call Print() instead
+//
+// Parse() is usefull when you need to control where
+// to output the title, for example to a log or a trace file
+func (cl Columns) Parse(cols ...string) Table {
+	return cl.parse(cols...)
+}
 
-// Add - adds a new column to existing tabular Format
-func (fm Format) Add(shortName, fullName string, columnLength int) {
-	fm[shortName] = &Column{Name: fullName, Length: columnLength}
+// Col - adds a new column to existing tabular Format
+func (cl Columns) Col(shortName, fullName string, columnLength int) {
+	cl[shortName] = &Column{Name: fullName, Length: columnLength}
+}
+
+func (cl Columns) parse(cols ...string) Table {
+	var header string
+	var subHeader string
+	var format string
+	for _, c := range cols {
+		header = header + " " + fmt.Sprintf(cl[c].f(), cl[c].Name)
+		subHeader = subHeader + " " + fmt.Sprintf(cl[c].f(), r(cl[c].Length))
+		format = format + " " + cl[c].f()
+	}
+
+	return Table{
+		Header:    strings.TrimSpace(header),
+		SubHeader: strings.TrimSpace(subHeader),
+		Format:    strings.TrimSpace(format) + "\n",
+	}
 }
 
 // f() returns fmt formatting, for example:

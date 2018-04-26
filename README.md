@@ -6,31 +6,37 @@
 
 # tabular
 
-Tabular package to print ASCII tables from command line utilities.
+Tabular simplifies printing ASCII tables from command line utilities without the need to pass large sets of data to it's API.  
 
-Example:
+Simply define the table columns and `tabular` will parse the right [format specifier](https://golang.org/pkg/fmt/#Printf) that you can use in your calls to `fmt` or any other function that supports it.
+
+Table columns can be defined once and then reused over and over again making it easy to modify column length and heading in one place.  And a subset of columns can be specified during Print() or Parse() calls to modify the table's title without redefining it.
+
+Example (also available in [`example/example.go`](example/example.go):
 
 ```go
 package main
 
 import (
 	"fmt"
+	"log"
 
 	"github.com/InVisionApp/tabular"
 )
 
-var tab tabular.Format
+var tab tabular.Columns
 
 func init() {
 	tab = tabular.New()
-	tab.Add("env", "Environment", 14)
-	tab.Add("cls", "Cluster", 10)
-	tab.Add("svc", "Service", 15)
-	tab.Add("hst", "Database Host", 20)
-	tab.Add("pct", "%CPU", 7)
+	tab.Col("env", "Environment", 14)
+	tab.Col("cls", "Cluster", 10)
+	tab.Col("svc", "Service", 15)
+	tab.Col("hst", "Database Host", 20)
+	tab.Col("pct", "%CPU", 7)
 	tab["pct"].RightJustified = true
 }
 
+// Sample data-set
 var data = []struct {
 	e, c, s, d string
 	v          float64
@@ -67,21 +73,29 @@ var data = []struct {
 
 func main() {
 	// Print Environments and Clusters
-	format := tab.Do("env", "cls")
+	format := tab.Print("env", "cls")
 	for _, x := range data {
 		fmt.Printf(format, x.e, x.c)
 	}
 
 	// Print Environments, Clusters and Services
-	format = tab.Do("env", "cls", "svc")
+	format = tab.Print("env", "cls", "svc")
 	for _, x := range data {
 		fmt.Printf(format, x.e, x.c, x.s)
 	}
 
-	// Print Clusters, Services and Database Hosts
-	format = tab.Do("cls", "svc", "hst", "pct")
+	// Print Everything
+	format = tab.Print("cls", "svc", "hst", "pct")
 	for _, x := range data {
 		fmt.Printf(format, x.c, x.s, x.d, x.v)
+	}
+
+	// Print Everything to a custom destination such as a log
+	table := tab.Parse("cls", "svc", "hst", "pct")
+	log.Println(table.Header)
+	log.Println(table.SubHeader)
+	for _, x := range data {
+		log.Printf(table.Format, x.c, x.s, x.d, x.v)
 	}
 }
 ```
@@ -109,4 +123,11 @@ cluster-1  service-a       database-host-1        70.01
 cluster-1  service-b       database-host-2        99.51
 cluster-2  service-a       database-host-1        70.01
 cluster-2  service-b       database-host-2        99.51
+
+2018/04/26 10:17:27 Cluster    Service         Database Host           %CPU
+2018/04/26 10:17:27 ---------- --------------- -------------------- -------
+2018/04/26 10:17:27 cluster-1  service-a       database-host-1        70.01
+2018/04/26 10:17:27 cluster-1  service-b       database-host-2        99.51
+2018/04/26 10:17:27 cluster-2  service-a       database-host-1        70.01
+2018/04/26 10:17:27 cluster-2  service-b       database-host-2        99.51
 ```
