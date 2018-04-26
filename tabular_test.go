@@ -6,7 +6,7 @@ import (
 )
 
 func TestTabular(t *testing.T) {
-	want := Format{
+	want := Columns{
 		"env": &Column{Name: "Environment", Length: 14},
 		"cls": &Column{Name: "Cluster", Length: 10},
 		"svc": &Column{Name: "Service", Length: 25},
@@ -16,7 +16,7 @@ func TestTabular(t *testing.T) {
 
 	got := New()
 	for k, v := range want {
-		got.Add(k, v.Name, v.Length)
+		got.Col(k, v.Name, v.Length)
 		got[k].RightJustified = v.RightJustified
 	}
 
