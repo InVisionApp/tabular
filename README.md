@@ -1,5 +1,6 @@
 [![LICENSE](https://img.shields.io/badge/license-MIT-orange.svg)](LICENSE)
 [![Build Status](https://travis-ci.org/InVisionApp/tabular.svg?branch=master)](https://travis-ci.org/InVisionApp/tabular)
+[![codecov](https://codecov.io/gh/InVisionApp/tabular/branch/master/graph/badge.svg)](https://codecov.io/gh/InVisionApp/tabular)
 [![Go Report Card](https://goreportcard.com/badge/github.com/InVisionApp/tabular)](https://goreportcard.com/report/github.com/InVisionApp/tabular)
 [![Godocs](https://img.shields.io/badge/golang-documentation-blue.svg)](https://godoc.org/github.com/InVisionApp/tabular)
 
