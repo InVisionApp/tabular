@@ -78,16 +78,19 @@ func (cl Columns) parse(cols ...string) Table {
 	var header string
 	var subHeader string
 	var format string
+	var space string
 	for _, c := range cols {
-		header = header + " " + fmt.Sprintf(cl[c].f(), cl[c].Name)
-		subHeader = subHeader + " " + fmt.Sprintf(cl[c].f(), r(cl[c].Length))
-		format = format + " " + cl[c].f()
+		cf := cl[c].f()
+		header = header + space + fmt.Sprintf(cf, cl[c].Name)
+		subHeader = subHeader + space + fmt.Sprintf(cf, r(cl[c].Length))
+		format = format + space + cf
+		space = " "
 	}
 
 	return Table{
-		Header:    strings.TrimSpace(header),
-		SubHeader: strings.TrimSpace(subHeader),
-		Format:    strings.TrimSpace(format) + "\n",
+		Header:    header,
+		SubHeader: subHeader,
+		Format:    format + "\n",
 	}
 }
 
