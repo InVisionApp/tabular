@@ -24,7 +24,7 @@ import (
 	"github.com/InVisionApp/tabular"
 )
 
-var tab tabular.Columns
+var tab tabular.Table
 
 func init() {
 	tab = tabular.New()
@@ -32,11 +32,9 @@ func init() {
 	tab.Col("cls", "Cluster", 10)
 	tab.Col("svc", "Service", 15)
 	tab.Col("hst", "Database Host", 20)
-	tab.Col("pct", "%CPU", 7)
-	tab["pct"].RightJustified = true
+	tab.ColRJ("pct", "%CPU", 7)
 }
 
-// Sample data-set
 var data = []struct {
 	e, c, s, d string
 	v          float64
@@ -72,30 +70,24 @@ var data = []struct {
 }
 
 func main() {
-	// Print Environments and Clusters
+	// Print a subset of columns (Environments and Clusters)
 	format := tab.Print("env", "cls")
 	for _, x := range data {
 		fmt.Printf(format, x.e, x.c)
 	}
 
-	// Print Environments, Clusters and Services
-	format = tab.Print("env", "cls", "svc")
+	// Print All Columns
+	format = tab.Print("*")
 	for _, x := range data {
-		fmt.Printf(format, x.e, x.c, x.s)
+		fmt.Printf(format, x.e, x.c, x.s, x.d, x.v)
 	}
 
-	// Print Everything
-	format = tab.Print("cls", "svc", "hst", "pct")
-	for _, x := range data {
-		fmt.Printf(format, x.c, x.s, x.d, x.v)
-	}
-
-	// Print Everything to a custom destination such as a log
-	table := tab.Parse("cls", "svc", "hst", "pct")
+	// Print All Columns to a custom destination such as a log
+	table := tab.Parse("*")
 	log.Println(table.Header)
 	log.Println(table.SubHeader)
 	for _, x := range data {
-		log.Printf(table.Format, x.c, x.s, x.d, x.v)
+		log.Printf(table.Format, x.e, x.c, x.s, x.d, x.v)
 	}
 }
 ```
@@ -110,24 +102,17 @@ production     cluster-1
 production     cluster-2
 production     cluster-2
 
-Environment    Cluster    Service
--------------- ---------- ---------------
-production     cluster-1  service-a
-production     cluster-1  service-b
-production     cluster-2  service-a
-production     cluster-2  service-b
+Environment    Cluster    Service         Database Host           %CPU
+-------------- ---------- --------------- -------------------- -------
+production     cluster-1  service-a       database-host-1        70.01
+production     cluster-1  service-b       database-host-2        99.51
+production     cluster-2  service-a       database-host-1        70.01
+production     cluster-2  service-b       database-host-2        99.51
 
-Cluster    Service         Database Host           %CPU
----------- --------------- -------------------- -------
-cluster-1  service-a       database-host-1        70.01
-cluster-1  service-b       database-host-2        99.51
-cluster-2  service-a       database-host-1        70.01
-cluster-2  service-b       database-host-2        99.51
-
-2018/04/26 10:17:27 Cluster    Service         Database Host           %CPU
-2018/04/26 10:17:27 ---------- --------------- -------------------- -------
-2018/04/26 10:17:27 cluster-1  service-a       database-host-1        70.01
-2018/04/26 10:17:27 cluster-1  service-b       database-host-2        99.51
-2018/04/26 10:17:27 cluster-2  service-a       database-host-1        70.01
-2018/04/26 10:17:27 cluster-2  service-b       database-host-2        99.51
+2018/05/14 11:19:41 Environment    Cluster    Service         Database Host           %CPU
+2018/05/14 11:19:41 -------------- ---------- --------------- -------------------- -------
+2018/05/14 11:19:41 production     cluster-1  service-a       database-host-1        70.01
+2018/05/14 11:19:41 production     cluster-1  service-b       database-host-2        99.51
+2018/05/14 11:19:41 production     cluster-2  service-a       database-host-1        70.01
+2018/05/14 11:19:41 production     cluster-2  service-b       database-host-2        99.51
 ```

@@ -5,23 +5,19 @@ import (
 	"strings"
 )
 
-// Table - parsed table's header, subheader and format specifier
-type Table struct {
+// Output - parsed table's header, subheader and format specifier
+type Output struct {
 	Header    string
 	SubHeader string
 	Format    string
 }
 
-// Columns - maps short names of columns to their structure defining:
-//	full name, length and whether it's right justified
-//
-// For Example:
-// 	"env": Column{Name: "Environment", Length: 14},
-// 	"cls": Column{Name: "Cluster",     Length: 40},
-// 	"srv": Column{Name: "Service",     Length: 35},
-// 	"hst": Column{Name: "Host",        Length: 45},
-// 	"pct": Column{Name: "%CPU",        Length: 7, RightJustified: true},
-type Columns map[string]*Column
+// Table - maps and orders short names of columns to their structure defining:
+// full name, length and whether it's right justified
+type Table struct {
+	Columns map[string]*Column
+	order   *[]string
+}
 
 // Column - defines column's name, length and if it's right justified
 type Column struct {
@@ -30,64 +26,88 @@ type Column struct {
 	RightJustified bool
 }
 
-// New - Creates a map of tabular Columns
-func New() Columns { return Columns{} }
+// All - pass this to Print() or Parse() to print or parse all columns of a table
+const All = "*"
+
+// New - Creates a new table
+func New() Table {
+	return Table{
+		Columns: map[string]*Column{},
+		order:   &[]string{},
+	}
+}
 
 // Print - does the following:
 //
-// 1) prints a table style heading for a given list of columns.
-//
-//    For example if Columns are defined as:
+// 1) prints a table style heading for a given list of columns,
+// for example, if Columns are defined as:
 //
 //      "env": Column{Name: "Environment", Length: 14},
 //      "cls": Column{Name: "Cluster",     Length: 40},
 //      "srv": Column{Name: "Service",     Length: 35},
 //
-//    It'll produce:
+// It'll produce:
 //
 // 	Environment    Cluster                                  Service
 //	-------------- ---------------------------------------- -----------------------------------
 //
 // 2) Returns an fmt style format specifier string that you can use
-//    to output values under the above heading via Printf(format,...):
+// to output values under the above heading via Printf(format,...):
 //
 //	%-14v %-40v %-35v
-func (cl Columns) Print(cols ...string) string {
-	t := cl.parse(cols...)
+func (tbl Table) Print(cols ...string) string {
+	t := tbl.parse(cols...)
 	fmt.Println(t.Header)
 	fmt.Println(t.SubHeader)
 	return t.Format
 }
 
-// Parse - builds a Table out of a given list of columns
+// Parse - constructs Table's Output structure containing it's header,
+// sub-header and format modifier out of a given list of columns.
 //
-// To simply print the table's title call Print() instead
+// To simply print the table's title call Print() instead.
 //
 // Parse() is usefull when you need to control where
-// to output the title, for example to a log or a trace file
-func (cl Columns) Parse(cols ...string) Table {
-	return cl.parse(cols...)
+// to output the title, for example to a log or a trace file.
+func (tbl Table) Parse(cols ...string) Output {
+	return tbl.parse(cols...)
 }
 
-// Col - adds a new column to existing tabular Format
-func (cl Columns) Col(shortName, fullName string, columnLength int) {
-	cl[shortName] = &Column{Name: fullName, Length: columnLength}
+// Col - adds a new column to an existing table
+func (tbl Table) Col(shortName, fullName string, columnLength int) {
+	tbl.Columns[shortName] = &Column{Name: fullName, Length: columnLength}
+	tbl.appendColumn(shortName)
 }
 
-func (cl Columns) parse(cols ...string) Table {
+// ColRJ - adds a new Right Justified column to an existing table
+func (tbl Table) ColRJ(shortName, fullName string, columnLength int) {
+	tbl.Columns[shortName] = &Column{Name: fullName, Length: columnLength, RightJustified: true}
+	tbl.appendColumn(shortName)
+}
+
+func (tbl Table) appendColumn(shortName string) {
+	*tbl.order = append(*tbl.order, shortName)
+}
+
+func (tbl Table) parse(cols ...string) Output {
 	var header string
 	var subHeader string
 	var format string
 	var space string
+
+	if len(cols) == 1 && cols[0] == All {
+		cols = *tbl.order
+	}
+
 	for _, c := range cols {
-		cf := cl[c].f()
-		header = header + space + fmt.Sprintf(cf, cl[c].Name)
-		subHeader = subHeader + space + fmt.Sprintf(cf, r(cl[c].Length))
+		cf := tbl.Columns[c].f()
+		header = header + space + fmt.Sprintf(cf, tbl.Columns[c].Name)
+		subHeader = subHeader + space + fmt.Sprintf(cf, r(tbl.Columns[c].Length))
 		format = format + space + cf
 		space = " "
 	}
 
-	return Table{
+	return Output{
 		Header:    header,
 		SubHeader: subHeader,
 		Format:    format + "\n",

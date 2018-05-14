@@ -7,7 +7,7 @@ import (
 	"github.com/InVisionApp/tabular"
 )
 
-var tab tabular.Columns
+var tab tabular.Table
 
 func init() {
 	tab = tabular.New()
@@ -15,8 +15,7 @@ func init() {
 	tab.Col("cls", "Cluster", 10)
 	tab.Col("svc", "Service", 15)
 	tab.Col("hst", "Database Host", 20)
-	tab.Col("pct", "%CPU", 7)
-	tab["pct"].RightJustified = true
+	tab.ColRJ("pct", "%CPU", 7)
 }
 
 var data = []struct {
@@ -54,29 +53,23 @@ var data = []struct {
 }
 
 func main() {
-	// Print Environments and Clusters
+	// Print a subset of columns (Environments and Clusters)
 	format := tab.Print("env", "cls")
 	for _, x := range data {
 		fmt.Printf(format, x.e, x.c)
 	}
 
-	// Print Environments, Clusters and Services
-	format = tab.Print("env", "cls", "svc")
+	// Print All Columns
+	format = tab.Print("*")
 	for _, x := range data {
-		fmt.Printf(format, x.e, x.c, x.s)
+		fmt.Printf(format, x.e, x.c, x.s, x.d, x.v)
 	}
 
-	// Print Clusters, Services and Database Hosts
-	format = tab.Print("cls", "svc", "hst", "pct")
-	for _, x := range data {
-		fmt.Printf(format, x.c, x.s, x.d, x.v)
-	}
-
-	// Print to a custom destination such as a log
-	table := tab.Parse("cls", "svc", "hst", "pct")
+	// Print All Columns to a custom destination such as a log
+	table := tab.Parse("*")
 	log.Println(table.Header)
 	log.Println(table.SubHeader)
 	for _, x := range data {
-		log.Printf(table.Format, x.c, x.s, x.d, x.v)
+		log.Printf(table.Format, x.e, x.c, x.s, x.d, x.v)
 	}
 }
