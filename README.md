@@ -1,3 +1,6 @@
+| :warning: This project is no longer actively supported.
+| ---
+
 [![LICENSE](https://img.shields.io/badge/license-MIT-orange.svg)](LICENSE)
 [![Build Status](https://travis-ci.org/InVisionApp/tabular.svg?branch=master)](https://travis-ci.org/InVisionApp/tabular)
 [![codecov](https://codecov.io/gh/InVisionApp/tabular/branch/master/graph/badge.svg)](https://codecov.io/gh/InVisionApp/tabular)
